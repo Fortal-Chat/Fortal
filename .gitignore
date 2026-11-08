@@ -1,0 +1,9 @@
+.env
+build/
+cmake-build-*/
+.idea/
+.gradle/
+local.properties
+*.iml
+.vscode/
+
