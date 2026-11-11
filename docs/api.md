@@ -1,4 +1,4 @@
-# Договор API — v0 (черновик, утвердить вдвоём)
+# Договор API — v0
 
 > Меняется **только** через Pull Request, который одобрили оба.
 > Клиенты, пока сервер не готов, работают с заглушками по этому документу.
@@ -37,7 +37,7 @@
 ```json
 { "username": "alice", "email": "alice@example.com", "password": "secret123" }
 ```
-Правила: `username` 3–32 символа `[a-zA-Z0-9_]`, `password` ≥ 8 символов.
+Правила: `username` 4–32 символа `[a-zA-Z0-9_]`, `password` ≥ 8 символов.
 
 `201`
 ```json
@@ -97,10 +97,11 @@
 Коды: `bad_json`, `no_op`, `unknown_op`.
 
 ### Позже (не v0)
-- `identify` с JWT после `hello` — этап 4.
-- События `message_create` и т.п. из Redis — этап 4.
+- `identify` с JWT после `hello`
+- События `message_create` и т.п. из Redis
 
 ---
 
 ## История изменений
-- **v0** — `/health`, регистрация, вход, gateway `hello`/`ping`/`echo`.
+- **v0** — `/health`, регистрация, вход, gateway `hello`/`ping`/`echo`. 11.11.2026
+
