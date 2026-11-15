@@ -8,7 +8,7 @@
 |---|---|---|
 | `docs/` | договор API (`docs/api.md`) и прочая документация | оба, через PR |
 | `server/` | основной сервер: Kotlin + Ktor (регистрация, вход, сообщества, каналы, сообщения) | напарник |
-| `gateway/` | gateway: C++, WebSocket, рассылка событий в реальном времени | я |
+| `gateway/` | gateway: Go, WebSocket, рассылка событий в реальном времени | я |
 | `desktop/` | desktop-клиент: C++, Qt 6 | я |
 | `android/` | Android-клиент: Kotlin, Jetpack Compose | напарник |
 | `deploy/` | выкладка на VPS (этап 5) | — |
