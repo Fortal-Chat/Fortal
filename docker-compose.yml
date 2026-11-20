@@ -17,6 +17,15 @@ services:
       timeout: 3s
       retries: 10
 
+  gateway:
+    build: ./gateway
+    container_name: fortal-gateway
+    restart: unless-stopped
+    environment:
+      GATEWAY_ADDR: ":8081"
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-8081}:8081"
+
 volumes:
   pgdata:
 
