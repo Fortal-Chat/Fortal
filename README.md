@@ -4,15 +4,15 @@
 
 ## Структура
 
-| Папка | Что там будет | Ведёт |
-|---|---|---|
-| `docs/` | договор API (`docs/api.md`) и прочая документация | оба, через PR |
-| `server/` | основной сервер: Kotlin + Ktor (регистрация, вход, сообщества, каналы, сообщения) | напарник |
-| `gateway/` | gateway: Go, WebSocket, рассылка событий в реальном времени | я |
-| `desktop/` | desktop-клиент: C++, Qt 6 | я |
-| `android/` | Android-клиент: Kotlin, Jetpack Compose | напарник |
-| `deploy/` | выкладка на VPS (этап 5) | — |
-| `.github/workflows/` | CI (GitHub Actions) | оба |
+| Папка | Что там будет |
+|---|---|
+| `docs/` | договор API (`docs/api.md`) и прочая документация |
+| `server/` | основной сервер: Java + Spring Boot (регистрация, вход, сообщества, каналы, сообщения) |
+| `gateway/` | gateway: Go, WebSocket, рассылка событий в реальном времени |
+| `desktop/` | desktop-клиент: C++, Qt 6 |
+| `android/` | Android-клиент: Kotlin, Jetpack Compose |
+| `deploy/` | выкладка на VPS (этап 5) |
+| `.github/workflows/` | CI (GitHub Actions) |
 
 ## Как работаем
 
