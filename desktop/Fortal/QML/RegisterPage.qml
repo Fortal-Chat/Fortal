@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-// Форма регистрации. Проверяет поля по правилам из docs/api.md
-// и испускает submitted(). Отправкой занимается Main.qml.
 ColumnLayout {
     id: root
 
@@ -12,7 +10,6 @@ ColumnLayout {
     signal submitted(string username, string email, string password)
     signal switchToLogin()
 
-    // ---- Управление снаружи (из Main.qml) ----
     function setFormError(message) { formError.text = message }
 
     function setFieldError(field, message) {
@@ -47,7 +44,6 @@ ColumnLayout {
 
     function focusFirstField() { usernameField.focusInput() }
 
-    // ---- Внутреннее ----
     function submit() {
         if (root.busy)
             return
@@ -57,9 +53,8 @@ ColumnLayout {
         const email = emailField.text.trim()
         let firstInvalid = null
 
-        // Правила из договора: username 3–32 символа [a-zA-Z0-9_], пароль ≥ 8
-        if (!/^[a-zA-Z0-9_]{3,32}$/.test(username)) {
-            usernameField.errorText = qsTr("От 3 до 32 символов: латинские буквы, цифры и _")
+        if (!/^[a-zA-Z0-9_]{4,32}$/.test(username)) {
+            usernameField.errorText = qsTr("От 4 до 32 символов: латинские буквы, цифры и _")
             firstInvalid = usernameField
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -108,7 +103,7 @@ ColumnLayout {
     FormField {
         id: usernameField
         label: qsTr("Имя пользователя")
-        hint: qsTr("3–32 символа: латиница, цифры и _")
+        hint: qsTr("4–32 символа: латиница, цифры и _")
         maximumLength: 32
         validator: RegularExpressionValidator { regularExpression: /[a-zA-Z0-9_]*/ }
         enabled: !root.busy

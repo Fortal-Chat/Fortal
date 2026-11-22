@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-// Поле формы: подпись сверху, поле ввода, подсказка или ошибка снизу.
 ColumnLayout {
     id: root
 
@@ -12,11 +11,11 @@ ColumnLayout {
     property alias validator: input.validator
     property alias maximumLength: input.maximumLength
     property alias inputMethodHints: input.inputMethodHints
-    property bool password: false      // скрывать ввод + кнопка «Показать»
-    property string hint: ""           // серая подсказка под полем
-    property string errorText: ""      // красная ошибка под полем (важнее подсказки)
+    property bool password: false
+    property string hint: ""
+    property string errorText: ""
 
-    signal accepted()                  // нажат Enter
+    signal accepted()
 
     function focusInput() { input.forceActiveFocus() }
 

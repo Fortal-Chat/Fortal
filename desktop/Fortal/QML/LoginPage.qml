@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-// Форма входа. Сама ничего не отправляет — только проверяет, что поля
-// заполнены, и испускает сигнал submitted(). Отправкой занимается Main.qml.
 ColumnLayout {
     id: root
 
@@ -12,7 +10,6 @@ ColumnLayout {
     signal submitted(string login, string password)
     signal switchToRegister()
 
-    // ---- Управление снаружи (из Main.qml) ----
     function setFormError(message) { formError.text = message }
 
     function setFieldError(field, message) {
@@ -40,7 +37,6 @@ ColumnLayout {
 
     function focusFirstField() { loginField.focusInput() }
 
-    // ---- Внутреннее ----
     function submit() {
         if (root.busy)
             return

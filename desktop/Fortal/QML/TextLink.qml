@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls.Basic
 
-// Кликабельный текст-ссылка («Зарегистрироваться», «Войти»).
 Label {
     id: root
 

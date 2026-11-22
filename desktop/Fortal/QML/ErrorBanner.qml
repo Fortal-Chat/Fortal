@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-// Красная плашка с общей ошибкой формы. Пустой text = плашка скрыта.
 Rectangle {
     id: root
 
