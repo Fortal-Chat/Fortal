@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 
-// Главная кнопка формы. busy = true: крутится индикатор, кнопка не нажимается.
 Button {
     id: control
 

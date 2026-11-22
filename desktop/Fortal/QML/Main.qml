@@ -18,24 +18,6 @@ ApplicationWindow {
     property int screen: Main.Screen.Login
     property string currentUsername: ""
 
-    // =====================================================================
-    //  API ДЛЯ БЭКЕНДА (C++)
-    //
-    //  Окно -> бэкенд (сигналы):
-    //    loginRequested(login, password)            — пользователь нажал «Войти»
-    //    registerRequested(username, email, password) — нажал «Зарегистрироваться»
-    //    logoutRequested()                          — нажал «Выйти»
-    //
-    //  Бэкенд -> окно (функции):
-    //    showAuthenticated(username) — вход/регистрация успешны
-    //    showError(code, message)    — ошибка; code из docs/api.md
-    //                                  (username_taken, email_taken,
-    //                                   invalid_credentials, validation_error)
-    //                                  или любой свой, например "network_error"
-    //
-    //  busy выставляется само при отправке и сбрасывается в showAuthenticated/showError.
-    // =====================================================================
-
     signal loginRequested(string login, string password)
     signal registerRequested(string username, string email, string password)
     signal logoutRequested()
@@ -73,7 +55,6 @@ ApplicationWindow {
         }
     }
 
-    // ---- Переключение экранов ----
     function switchTo(target) {
         loginPage.clearErrors()
         registerPage.clearErrors()
@@ -86,16 +67,6 @@ ApplicationWindow {
         })
     }
 
-    // =====================================================================
-    //  ВРЕМЕННАЯ ЗАГЛУШКА СЕРВЕРА — только чтобы посмотреть, как выглядит
-    //  загрузка, ошибки и успех. Когда подключишь C++, поставь
-    //  useFakeBackend: false или удали этот блок целиком.
-    //
-    //  Вход:        alice / secret123 (или alice@example.com) — успех,
-    //               иначе invalid_credentials.
-    //  Регистрация: username "alice" — username_taken,
-    //               email "alice@example.com" — email_taken, иначе успех.
-    // =====================================================================
     property bool useFakeBackend: true
 
     Timer {
@@ -133,9 +104,7 @@ ApplicationWindow {
                 showAuthenticated(username)
         })
     }
-    // ===================== конец заглушки =====================
 
-    // ---- Фон ----
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
@@ -144,7 +113,6 @@ ApplicationWindow {
         }
     }
 
-    // ---- Карточка по центру (прокручивается, если окно низкое) ----
     Flickable {
         id: flick
         anchors.fill: parent
@@ -178,7 +146,6 @@ ApplicationWindow {
                 anchors.margins: card.padding
                 spacing: 24
 
-                // Логотип
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 10
@@ -231,7 +198,6 @@ ApplicationWindow {
                     onSwitchToLogin: window.switchTo(Main.Screen.Login)
                 }
 
-                // Временный экран после входа — пока нет главного окна
                 ColumnLayout {
                     Layout.fillWidth: true
                     visible: window.screen === Main.Screen.SignedIn
@@ -265,7 +231,6 @@ ApplicationWindow {
         }
     }
 
-    // ---- Переключатель темы ----
     Button {
         id: themeToggle
         anchors.top: parent.top
@@ -293,6 +258,74 @@ ApplicationWindow {
             color: themeToggle.hovered ? Theme.fieldHover : "transparent"
             border.width: 1
             border.color: Theme.cardBorder
+        }
+    }
+
+    GatewayClient {
+        id: gateway
+        url: "ws://localhost:8081/"
+        Component.onCompleted: start()
+    }
+
+    Rectangle {
+        id: connectionBadge
+
+        readonly property bool pending: gateway.status === GatewayClient.Connecting
+                                        || gateway.status === GatewayClient.Reconnecting
+
+        readonly property color dotColor: {
+            switch (gateway.status) {
+            case GatewayClient.Connected: return Theme.success
+            case GatewayClient.Disconnected: return Theme.danger
+            default: return Theme.warning
+            }
+        }
+
+        readonly property string label: {
+            switch (gateway.status) {
+            case GatewayClient.Connected: return qsTr("В сети")
+            case GatewayClient.Connecting: return qsTr("Подключение…")
+            case GatewayClient.Reconnecting: return qsTr("Переподключение…")
+            default: return qsTr("Нет соединения")
+            }
+        }
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.margins: 16
+        width: badgeRow.implicitWidth + 24
+        height: badgeRow.implicitHeight + 12
+        radius: Theme.radius
+        color: "transparent"
+        border.width: 1
+        border.color: Theme.cardBorder
+
+        RowLayout {
+            id: badgeRow
+            anchors.centerIn: parent
+            spacing: 8
+
+            Rectangle {
+                id: dot
+                implicitWidth: 8
+                implicitHeight: 8
+                radius: 4
+                color: connectionBadge.dotColor
+
+                SequentialAnimation on opacity {
+                    running: connectionBadge.pending
+                    loops: Animation.Infinite
+                    alwaysRunToEnd: true
+                    NumberAnimation { to: 0.3; duration: 600; easing.type: Easing.InOutQuad }
+                    NumberAnimation { to: 1.0; duration: 600; easing.type: Easing.InOutQuad }
+                }
+            }
+
+            Label {
+                text: connectionBadge.label
+                color: Theme.textMuted
+                font.pixelSize: 13
+            }
         }
     }
 
