@@ -1,5 +1,6 @@
 package com.fortal.server.controller;
 
+import com.fortal.server.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,9 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
 @AutoConfigureMockMvc
-class HealthControllerTest {
+class HealthControllerTest extends BaseIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
