@@ -1,7 +1,6 @@
 #include "Protocol.h"
 #include <QJsonDocument>
 #include <QJsonParseError>
-#include <QJsonValue>
 
 static Protocol::Op opFromString(const QString& s) {
     if (s == "hello") return Protocol::Op::Hello;
