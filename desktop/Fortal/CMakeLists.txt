@@ -5,9 +5,20 @@ project(Fortal VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick WebSockets)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick WebSockets Test)
 
 qt_standard_project_setup(REQUIRES 6.10)
+
+qt_add_library(fortal_core STATIC
+    include/Backoff.h  src/Backoff.cpp
+    include/Protocol.h src/Protocol.cpp
+)
+
+target_include_directories(fortal_core PUBLIC include)
+
+target_link_libraries(fortal_core PUBLIC
+    Qt6::Core
+)
 
 qt_add_executable(appFortal
     main.cpp
@@ -28,11 +39,7 @@ qt_add_qml_module(appFortal
         QML/RegisterPage.qml
     SOURCES
         include/GatewayClient.h src/GatewayClient.cpp
-        include/Backoff.h       src/Backoff.cpp
-        include/Protocol.h      src/Protocol.cpp
 )
-
-target_include_directories(appFortal PRIVATE include)
 
 set_target_properties(appFortal PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
@@ -42,6 +49,7 @@ set_target_properties(appFortal PROPERTIES
 )
 
 target_link_libraries(appFortal PRIVATE
+    fortal_core
     Qt6::Quick
     Qt6::WebSockets
 )
@@ -52,3 +60,6 @@ install(TARGETS appFortal
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+enable_testing()
+add_subdirectory(tests)
