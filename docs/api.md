@@ -17,7 +17,7 @@
 
 | Сервис | Порт | Пример |
 |---|---|---|
-| Сервер (Ktor), HTTP | 8080 | `http://localhost:8080` |
+| Сервер (Spring Boot), HTTP | 8080 | `http://localhost:8080` |
 | Gateway, WebSocket | 8081 | `ws://localhost:8081/` |
 
 ---
