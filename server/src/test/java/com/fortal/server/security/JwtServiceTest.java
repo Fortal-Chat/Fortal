@@ -47,4 +47,35 @@ public class JwtServiceTest {
                 () -> jwtService.getUserId(wrongToken)
         );
     }
+
+    @Test
+    void shouldRejectInvalidBase64Secret() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new JwtService("not a valid base64 key!")
+        );
+
+        assertEquals(
+                "JWT secret must be Base64-encoded and contain exactly 32 bytes",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void shouldRejectShortSecret() {
+        String shortSecret = Encoders.BASE64.encode(
+                new byte[16]
+        );
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new JwtService(shortSecret)
+        );
+
+        assertEquals(
+                "JWT secret must be Base64-encoded and contain exactly 32 bytes",
+                exception.getMessage()
+        );
+    }
+
 }
