@@ -1,6 +1,7 @@
 package com.fortal.server.controller;
 
 import com.fortal.server.dto.AuthResponse;
+import com.fortal.server.dto.LoginRequest;
 import com.fortal.server.dto.RegisterRequest;
 import com.fortal.server.service.AuthService;
 import jakarta.validation.Valid;
@@ -29,4 +30,13 @@ public class AuthController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(
+            @Valid @RequestBody LoginRequest request
+    ) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
 }

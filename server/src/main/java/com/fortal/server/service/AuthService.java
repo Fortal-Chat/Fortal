@@ -1,8 +1,7 @@
 package com.fortal.server.service;
 
-import com.fortal.server.dto.AuthResponse;
-import com.fortal.server.dto.RegisterRequest;
-import com.fortal.server.dto.RegisteredUser;
+import com.fortal.server.dto.*;
+import com.fortal.server.exception.InvalidCredentialsException;
 import com.fortal.server.exception.InvalidRegistrationException;
 import com.fortal.server.repository.UserRepository;
 import com.fortal.server.security.JwtService;
@@ -48,6 +47,29 @@ public class AuthService {
                 request.username()
         );
         String token = jwtService.generateToken(id);
+        return new AuthResponse(user, token);
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        UserCredentials credentials = userRepository
+                .findByLogin(request.login())
+                .orElseThrow(InvalidCredentialsException::new);
+
+        boolean passwordMatches = passwordService.matches(
+                request.password(),
+                credentials.passwordHash()
+        );
+
+        if(!passwordMatches) {
+            throw new InvalidCredentialsException();
+        }
+
+        RegisteredUser user = new RegisteredUser(
+                credentials.id(),
+                credentials.username()
+        );
+        String token = jwtService.generateToken(credentials.id());
+
         return new AuthResponse(user, token);
     }
 }
