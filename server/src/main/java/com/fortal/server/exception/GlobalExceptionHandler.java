@@ -87,4 +87,18 @@ public class GlobalExceptionHandler {
                         "Invalid registration data"
                 ));
     }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(
+            InvalidCredentialsException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(
+                        ErrorResponse.of(
+                                "invalid_credentials",
+                                "Invalid login or password"
+                        )
+                );
+    }
 }

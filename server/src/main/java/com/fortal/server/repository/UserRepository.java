@@ -1,8 +1,10 @@
 package com.fortal.server.repository;
 
+import com.fortal.server.dto.UserCredentials;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -35,6 +37,30 @@ public class UserRepository {
                 username,
                 email,
                 passwordHash
+        );
+    }
+
+    public Optional<UserCredentials> findByLogin(String login) {
+        String sql = """
+                SELECT id, username, password_hash
+                FROM users
+                WHERE username = ? OR email = ?
+                """;
+        return jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if(!rs.next()) {
+                        return Optional.empty();
+                    }
+                    UserCredentials user = new UserCredentials(
+                            rs.getObject("id", UUID.class),
+                            rs.getString("username"),
+                            rs.getString("password_hash")
+                    );
+                    return Optional.of(user);
+                },
+                login,
+                login
         );
     }
 }
