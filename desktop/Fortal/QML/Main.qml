@@ -22,10 +22,9 @@ ApplicationWindow {
     signal registerRequested(string username, string email, string password)
     signal logoutRequested()
 
-    property bool busy: false
+    readonly property bool busy: auth.busy
 
     function showAuthenticated(username) {
-        busy = false
         currentUsername = username
         loginPage.reset()
         registerPage.reset()
@@ -33,7 +32,6 @@ ApplicationWindow {
     }
 
     function showError(code, message) {
-        busy = false
         const page = screen === Main.Screen.Register ? registerPage : loginPage
 
         switch (code) {
@@ -67,43 +65,16 @@ ApplicationWindow {
         })
     }
 
-    property bool useFakeBackend: true
-
-    Timer {
-        id: fakeServer
-        interval: 800
-        property var reply: null
-        onTriggered: reply()
+    AuthClient {
+        id: auth
+        baseUrl: "http://localhost:8080"
+        onLoggedIn: window.showAuthenticated(auth.username)
+        onFailed: (code, message) => window.showError(code, message)
     }
 
-    function fakeRespond(reply) {
-        fakeServer.reply = reply
-        fakeServer.restart()
-    }
-
-    onLoginRequested: (login, password) => {
-        if (!useFakeBackend)
-            return
-        fakeRespond(() => {
-            if ((login === "alice" || login === "alice@example.com") && password === "secret123")
-                showAuthenticated("alice")
-            else
-                showError("invalid_credentials", "")
-        })
-    }
-
-    onRegisterRequested: (username, email, password) => {
-        if (!useFakeBackend)
-            return
-        fakeRespond(() => {
-            if (username.toLowerCase() === "alice")
-                showError("username_taken", "")
-            else if (email.toLowerCase() === "alice@example.com")
-                showError("email_taken", "")
-            else
-                showAuthenticated(username)
-        })
-    }
+    onLoginRequested: (login, password) => auth.login(login, password)
+    onRegisterRequested: (username, email, password) => auth.registerUser(username, email, password)
+    onLogoutRequested: auth.logout()
 
     Rectangle {
         anchors.fill: parent
@@ -179,7 +150,6 @@ ApplicationWindow {
                     busy: window.busy
 
                     onSubmitted: (login, password) => {
-                        window.busy = true
                         window.loginRequested(login, password)
                     }
                     onSwitchToRegister: window.switchTo(Main.Screen.Register)
@@ -192,7 +162,6 @@ ApplicationWindow {
                     busy: window.busy
 
                     onSubmitted: (username, email, password) => {
-                        window.busy = true
                         window.registerRequested(username, email, password)
                     }
                     onSwitchToLogin: window.switchTo(Main.Screen.Login)

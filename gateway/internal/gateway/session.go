@@ -74,7 +74,7 @@ func (s *Session) handle(data []byte) error {
 
 	default:
 		s.log.Debug("unknown op", "op", msg.Op)
-		return s.sendError(protocol.ErrorData{Code: protocol.ErrUnknownOp, Message: "unknown operation" + msg.Op})
+		return s.sendError(protocol.ErrorData{Code: protocol.ErrUnknownOp, Message: "unknown operation: " + msg.Op})
 	}
 }
 
