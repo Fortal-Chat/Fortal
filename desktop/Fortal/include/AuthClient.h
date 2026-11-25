@@ -46,6 +46,9 @@ private:
     AuthProtocol::Session m_session;
 
     void post(const QString& path, const QByteArray& body);
+    void handleSuccess(const QByteArray& body);
+    void handleFailure(const QByteArray& body);
+    void handleNetworkError();
 
 private slots:
     void onFinished();
