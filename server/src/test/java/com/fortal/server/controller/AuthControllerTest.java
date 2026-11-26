@@ -330,4 +330,138 @@ class AuthControllerTest extends BaseIntegrationTest {
                         .value("validation_error"));
     }
 
+    @Test
+    void shouldRejectDuplicateUsernameIgnoringCase() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String username = "User_" + suffix;
+
+        String firstJson = """
+            {
+                "username": "%s",
+                "email": "first_%s@example.com",
+                "password": "password123"
+            }
+            """.formatted(username, suffix);
+
+        String secondJson = """
+            {
+                "username": "%s",
+                "email": "second_%s@example.com",
+                "password": "password123"
+            }
+            """.formatted(username.toLowerCase(), suffix);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(firstJson))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(secondJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code")
+                        .value("username_taken"));
+    }
+
+    @Test
+    void shouldRejectDuplicateEmailIgnoringCase() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String email = "Test_" + suffix + "@Example.com";
+
+        String firstJson = """
+            {
+                "username": "first_%s",
+                "email": "%s",
+                "password": "password123"
+            }
+            """.formatted(suffix, email);
+
+        String secondJson = """
+            {
+                "username": "second_%s",
+                "email": "%s",
+                "password": "password123"
+            }
+            """.formatted(suffix, email.toLowerCase());
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(firstJson))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(secondJson))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error.code")
+                        .value("email_taken"));
+    }
+
+    @Test
+    void shouldLoginIgnoringUsernameCase() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String username = "Test.User-" + suffix;
+
+        String registerJson = """
+            {
+                "username": "%s",
+                "email": "%s@example.com",
+                "password": "password123"
+            }
+            """.formatted(username, suffix);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerJson))
+                .andExpect(status().isCreated());
+
+        String loginJson = """
+            {
+                "login": "%s",
+                "password": "password123"
+            }
+            """.formatted(username.toLowerCase());
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.username").value(username))
+                .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    void shouldLoginIgnoringEmailCase() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        String username = "user_" + suffix;
+        String email = "Test_" + suffix + "@Example.com";
+
+        String registerJson = """
+            {
+                "username": "%s",
+                "email": "%s",
+                "password": "password123"
+            }
+            """.formatted(username, email);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerJson))
+                .andExpect(status().isCreated());
+
+        String loginJson = """
+            {
+                "login": "%s",
+                "password": "password123"
+            }
+            """.formatted(email.toLowerCase());
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.user.username").value(username))
+                .andExpect(jsonPath("$.token").isNotEmpty());
+    }
 }

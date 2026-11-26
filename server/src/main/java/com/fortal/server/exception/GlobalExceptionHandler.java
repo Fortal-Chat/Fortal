@@ -52,7 +52,7 @@ public class GlobalExceptionHandler {
                 if(serverError != null){
                     String constraint = serverError.getConstraint();
 
-                    if("users_username_key".equals(constraint)) {
+                    if("users_username_lower_idx".equals(constraint)) {
                         return ResponseEntity
                                 .status(HttpStatus.CONFLICT)
                                 .body(ErrorResponse.of(
@@ -61,7 +61,7 @@ public class GlobalExceptionHandler {
                                 ));
                     }
 
-                    if ("users_email_key".equals(constraint)) {
+                    if ("users_email_lower_idx".equals(constraint)) {
                         return ResponseEntity
                                 .status(HttpStatus.CONFLICT)
                                 .body(ErrorResponse.of(
