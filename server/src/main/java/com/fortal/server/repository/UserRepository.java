@@ -45,8 +45,9 @@ public class UserRepository {
         String sql = """
                 SELECT id, username, password_hash
                 FROM users
-                WHERE username = ? OR email = ?
-                """;
+                WHERE lower(username) = lower(?)
+                   OR lower(email) = lower(?)
+            """;
         return jdbcTemplate.query(
                 sql,
                 rs -> {
