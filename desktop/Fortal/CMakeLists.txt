@@ -13,6 +13,7 @@ qt_add_library(fortal_core STATIC
     include/Backoff.h  src/Backoff.cpp
     include/Protocol.h src/Protocol.cpp
     include/AuthProtocol.h src/AuthProtocol.cpp
+    include/ApiError.h src/ApiError.cpp
 )
 
 target_include_directories(fortal_core PUBLIC include)
@@ -40,6 +41,8 @@ qt_add_qml_module(appFortal
         QML/RegisterPage.qml
     SOURCES
         include/GatewayClient.h src/GatewayClient.cpp
+        include/ApiReply.h src/ApiReply.cpp
+        include/ApiClient.h src/ApiClient.cpp
         include/AuthClient.h src/AuthClient.cpp
 )
 

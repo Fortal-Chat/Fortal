@@ -11,14 +11,6 @@ static std::optional<AuthProtocol::User> userFromObj(const QJsonObject& obj) {
     return AuthProtocol::User{id, username};
 }
 
-static std::optional<AuthProtocol::ApiError> errorFromObj(const QJsonObject& obj) {
-    const QString code = obj.value("code").toString();
-    const QString message = obj.value("message").toString();
-    if(code.isEmpty()) return std::nullopt;
-    return AuthProtocol::ApiError{code, message};
-}
-
-
 QByteArray AuthProtocol::registerBody(const QString& username, const QString& email, const QString& password) {
     QJsonObject result;
     result.insert("username", username);
@@ -45,9 +37,4 @@ std::optional<AuthProtocol::Session> AuthProtocol::parseSession(const QByteArray
     if (token.isEmpty() || !user) return std::nullopt;
 
     return Session{*user, token};
-}
-
-AuthProtocol::ApiError AuthProtocol::parseError(const QByteArray& body) {
-    const QJsonObject obj = QJsonDocument::fromJson(body).object();
-    return errorFromObj(obj.value("error").toObject()).value_or(ApiError{"bad_response", "Некорректный ответ сервера"});
 }
