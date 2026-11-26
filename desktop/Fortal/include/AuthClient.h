@@ -2,54 +2,47 @@
 
 #include <QObject>
 #include <QtQml/qqmlregistration.h>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QUrl>
+#include <QPointer>
 
-#include <memory>
-
+#include "ApiClient.h"
 #include "AuthProtocol.h"
 
 class AuthClient : public QObject {
     Q_OBJECT
     QML_ELEMENT
-    Q_PROPERTY(QUrl baseUrl READ baseUrl WRITE setBaseUrl NOTIFY baseUrlChanged)
+    Q_PROPERTY(ApiClient* api READ api WRITE setApi NOTIFY apiChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QString token READ token NOTIFY sessionChanged)
     Q_PROPERTY(QString username READ username NOTIFY sessionChanged)
 
 public:
     explicit AuthClient(QObject* parent = nullptr);
-    ~AuthClient() override;
 
     Q_INVOKABLE void login(const QString& login, const QString& password);
     Q_INVOKABLE void registerUser(const QString& username, const QString& email, const QString& password);
     Q_INVOKABLE void logout();
 
-    QUrl baseUrl() const;
-    void setBaseUrl(const QUrl& url);
+    ApiClient* api() const;
+    void setApi(ApiClient* api);
     bool busy() const;
     QString token() const;
     QString username() const;
 
 signals:
-    void baseUrlChanged();
+    void apiChanged();
     void busyChanged();
     void sessionChanged();
     void loggedIn();
     void failed(const QString& code, const QString& message);
+    void sessionExpired();
 
 private:
-    std::unique_ptr<QNetworkAccessManager> m_network;
-    QNetworkReply* m_reply = nullptr;
-    QUrl m_baseUrl;
+    QPointer<ApiClient> m_api;
+    ApiReply* m_reply = nullptr;
     AuthProtocol::Session m_session;
 
-    void post(const QString& path, const QByteArray& body);
-    void handleSuccess(const QByteArray& body);
-    void handleFailure(const QByteArray& body);
-    void handleNetworkError();
-
 private slots:
-    void onFinished();
+    void onSessionReceived(const QByteArray& body);
+    void onRequestFailed(const QString& code, const QString& message);
+    void onUnauthorized();
 };

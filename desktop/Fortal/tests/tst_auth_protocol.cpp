@@ -17,10 +17,6 @@ private slots:
     void parseSessionValid();
     void parseSessionRejectsInvalid_data();
     void parseSessionRejectsInvalid();
-    void parseErrorValid();
-    void parseErrorWithoutMessage();
-    void parseErrorFallback_data();
-    void parseErrorFallback();
 };
 
 void TestAuthProtocol::registerBodyFields() {
@@ -66,37 +62,6 @@ void TestAuthProtocol::parseSessionRejectsInvalid() {
     QFETCH(QByteArray, body);
 
     QVERIFY(!AuthProtocol::parseSession(body).has_value());
-}
-
-void TestAuthProtocol::parseErrorValid() {
-    const auto error = AuthProtocol::parseError(R"({"error":{"code":"username_taken","message":"Имя занято"}})");
-    QCOMPARE(error.code, QString("username_taken"));
-    QCOMPARE(error.message, QString("Имя занято"));
-}
-
-void TestAuthProtocol::parseErrorWithoutMessage() {
-    const auto error = AuthProtocol::parseError(R"({"error":{"code":"invalid_credentials"}})");
-    QCOMPARE(error.code, QString("invalid_credentials"));
-    QVERIFY(error.message.isEmpty());
-}
-
-void TestAuthProtocol::parseErrorFallback_data() {
-    QTest::addColumn<QByteArray>("body");
-
-    QTest::newRow("empty") << QByteArray("");
-    QTest::newRow("html") << QByteArray("<html><body>502 Bad Gateway</body></html>");
-    QTest::newRow("array") << QByteArray("[1,2]");
-    QTest::newRow("no error") << QByteArray(R"({"status":"ok"})");
-    QTest::newRow("error is string") << QByteArray(R"({"error":"boom"})");
-    QTest::newRow("empty code") << QByteArray(R"({"error":{"code":"","message":"x"}})");
-}
-
-void TestAuthProtocol::parseErrorFallback() {
-    QFETCH(QByteArray, body);
-
-    const auto error = AuthProtocol::parseError(body);
-    QCOMPARE(error.code, QString("bad_response"));
-    QVERIFY(!error.message.isEmpty());
 }
 
 QTEST_APPLESS_MAIN(TestAuthProtocol)

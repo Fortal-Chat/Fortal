@@ -65,11 +65,21 @@ ApplicationWindow {
         })
     }
 
+    ApiClient {
+        id: api
+        baseUrl: "http://localhost:8080"
+    }
+
     AuthClient {
         id: auth
-        baseUrl: "http://localhost:8080"
+        api: api
         onLoggedIn: window.showAuthenticated(auth.username)
         onFailed: (code, message) => window.showError(code, message)
+        onSessionExpired: {
+            window.currentUsername = ""
+            window.switchTo(Main.Screen.Login)
+            loginPage.setFormError(qsTr("Сессия истекла, войдите снова"))
+        }
     }
 
     onLoginRequested: (login, password) => auth.login(login, password)
