@@ -16,8 +16,20 @@ public record RegisterRequest(
         String email,
 
         @NotBlank
-        @Size(min = 8)
+        @Size(min = 8, max = 72)
+        @Pattern(
+                regexp = "^[a-zA-Z0-9_.?/\\\\%*@$#~!()-]{8,72}$"
+        )
         String password
 ) {
 
+        public RegisterRequest {
+                if (username != null) {
+                        username = username.trim();
+                }
+
+                if (email != null) {
+                        email = email.trim();
+                }
+        }
 }

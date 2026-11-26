@@ -6,4 +6,10 @@ public record LoginRequest(
         @NotBlank String login,
         @NotBlank String password
 ) {
+
+    public LoginRequest {
+        if (login != null) {
+            login = login.trim();
+        }
+    }
 }
