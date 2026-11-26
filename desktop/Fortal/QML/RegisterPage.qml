@@ -53,16 +53,20 @@ ColumnLayout {
         const email = emailField.text.trim()
         let firstInvalid = null
 
-        if (!/^[a-zA-Z0-9_]{4,32}$/.test(username)) {
-            usernameField.errorText = qsTr("От 4 до 32 символов: латинские буквы, цифры и _")
+        if (!/^[a-zA-Z0-9_.-]{4,32}$/.test(username)) {
+            usernameField.errorText = qsTr("От 4 до 32 символов: латинские буквы, цифры, _ . -")
             firstInvalid = usernameField
         }
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             emailField.errorText = qsTr("Введите корректный email")
             firstInvalid = firstInvalid || emailField
         }
-        if (passwordField.text.length < 8) {
-            passwordField.errorText = qsTr("Пароль должен быть не короче 8 символов")
+        const password = passwordField.text
+        if (password.length < 8 || password.length > 72) {
+            passwordField.errorText = qsTr("Пароль должен быть от 8 до 72 символов")
+            firstInvalid = firstInvalid || passwordField
+        } else if (!/^[a-zA-Z0-9_.?\/\\%*@$#~!()-]+$/.test(password)) {
+            passwordField.errorText = qsTr("Допустимы только латинские буквы, цифры и _ . - ? / \\ % * @ $ # ~ ! ( )")
             firstInvalid = firstInvalid || passwordField
         }
         if (confirmField.text !== passwordField.text) {
@@ -103,9 +107,9 @@ ColumnLayout {
     FormField {
         id: usernameField
         label: qsTr("Имя пользователя")
-        hint: qsTr("4–32 символа: латиница, цифры и _")
+        hint: qsTr("4–32 символа: латиница, цифры, _ . -")
         maximumLength: 32
-        validator: RegularExpressionValidator { regularExpression: /[a-zA-Z0-9_]*/ }
+        validator: RegularExpressionValidator { regularExpression: /[a-zA-Z0-9_.-]*/ }
         enabled: !root.busy
         onAccepted: emailField.focusInput()
     }
@@ -121,7 +125,8 @@ ColumnLayout {
     FormField {
         id: passwordField
         label: qsTr("Пароль")
-        hint: qsTr("Минимум 8 символов")
+        hint: qsTr("8–72 символа: латиница, цифры и _ . - ? / \\ % * @ $ # ~ ! ( )")
+        maximumLength: 72
         password: true
         enabled: !root.busy
         onAccepted: confirmField.focusInput()
@@ -130,6 +135,7 @@ ColumnLayout {
     FormField {
         id: confirmField
         label: qsTr("Повторите пароль")
+        maximumLength: 72
         password: true
         enabled: !root.busy
         onAccepted: root.submit()
