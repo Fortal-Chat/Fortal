@@ -1,6 +1,7 @@
 package com.fortal.server.repository;
 
 import com.fortal.server.dto.UserCredentials;
+import com.fortal.server.dto.UserResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -61,6 +62,30 @@ public class UserRepository {
                 },
                 login,
                 login
+        );
+    }
+
+    public Optional<UserResponse> findById(UUID id) {
+        String sql = """
+                SELECT id, username, email, created_at
+                FROM users
+                WHERE id = ?
+                """;
+        return jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if(!rs.next()) {
+                        return Optional.empty();
+                    }
+                    UserResponse user = new UserResponse(
+                            rs.getObject("id", UUID.class),
+                            rs.getString("username"),
+                            rs.getString("email"),
+                            rs.getTimestamp("created_at").toInstant()
+                    );
+                    return Optional.of(user);
+                },
+                id
         );
     }
 }
