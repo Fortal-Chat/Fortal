@@ -4,6 +4,8 @@ import com.fortal.server.BaseIntegrationTest;
 import com.fortal.server.security.PasswordService;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -330,6 +332,140 @@ class AuthControllerTest extends BaseIntegrationTest {
                         .value("validation_error"));
     }
 
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "1234567",
+            "пароль123",
+            "password 123",
+            "password+123",
+            "password:123"
+    })
+    void shouldRejectInvalidPasswords(String password) throws Exception {
+        String suffix = UUID.randomUUID()
+                .toString()
+                .substring(0, 8);
+
+        String json = """
+            {
+                "username": "user_%s",
+                "email": "%s@example.com",
+                "password": "%s"
+            }
+            """.formatted(suffix, suffix, password);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code")
+                        .value("validation_error"));
+    }
+
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "12345678",
+            "Password_123",
+            "Password.123",
+            "Password-123",
+            "Password?123",
+            "Password/123",
+            "Password%123",
+            "Password*123",
+            "Password@123",
+            "Password$123",
+            "Password#123",
+            "Password~123",
+            "Password!123",
+            "Password(123)"
+    })
+    void shouldAcceptValidPasswords(String password) throws Exception {
+        String suffix = UUID.randomUUID()
+                .toString()
+                .substring(0, 8);
+
+        String username = "user_" + suffix;
+
+        String json = """
+            {
+                "username": "%s",
+                "email": "%s@example.com",
+                "password": "%s"
+            }
+            """.formatted(username, suffix, password);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.user.username")
+                        .value(username))
+                .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    void shouldAcceptPasswordWith72Characters() throws Exception {
+        String suffix = UUID.randomUUID()
+                .toString()
+                .substring(0, 8);
+
+        String json = """
+            {
+                "username": "user_%s",
+                "email": "%s@example.com",
+                "password": "%s"
+            }
+            """.formatted(suffix, suffix, "a".repeat(72));
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+    }
+
+
+    @Test
+    void shouldTrimUsernameAndEmailOnRegistration() throws Exception {
+        String suffix = UUID.randomUUID()
+                .toString()
+                .substring(0, 8);
+
+        String username = "Test.User-" + suffix;
+        String email = "Test_" + suffix + "@Example.com";
+
+        String json = """
+            {
+                "username": "  %s  ",
+                "email": "  %s  ",
+                "password": "password123"
+            }
+            """.formatted(username, email);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.user.username")
+                        .value(username));
+
+        String storedEmail = jdbcTemplate.queryForObject(
+                "SELECT email FROM users WHERE username = ?",
+                String.class,
+                username
+        );
+
+        assertEquals(email, storedEmail);
+    }
+
+
+    @Test
+    void shouldTrimLoginButNotPassword() throws Exception {
+        String suffix = UUID.randomUUID()
+                .toString()
+                .substring(0, 8);
+
+        String username = "User_" + suffix;
     @Test
     void shouldRejectDuplicateUsernameIgnoringCase() throws Exception {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
@@ -415,6 +551,34 @@ class AuthControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerJson))
                 .andExpect(status().isCreated());
+
+        String validLoginJson = """
+            {
+                "login": "  %s  ",
+                "password": "password123"
+            }
+            """.formatted(username);
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(validLoginJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+
+        String invalidLoginJson = """
+            {
+                "login": "%s",
+                "password": " password123 "
+            }
+            """.formatted(username);
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidLoginJson))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code")
+                        .value("invalid_credentials"));
+    }
 
         String loginJson = """
             {
